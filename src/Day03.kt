@@ -1,14 +1,15 @@
+import kotlin.math.pow
 import kotlin.streams.toList
 
 fun main() {
 
 
     fun part1(input: List<String>): Int {
-        fun getBytesForSequence(sequence: String): ByteArray {
-            return sequence.toByteArray(Charsets.UTF_8).mapTo()
+        fun getBytesForSequence(sequence: String): List<Byte> {
+            return sequence.toByteArray(Charsets.UTF_8).map { (it - 48).toByte() }
         }
 
-        fun getNumberOfOneBits(inputInt: List<ByteArray>, sequenceSize: Int): IntArray {
+        fun getNumberOfOneBits(inputInt: List<List<Byte>>, sequenceSize: Int): IntArray {
             val numberOfOneBits = IntArray(sequenceSize)
             for (sequence in inputInt) {
                 for (index in sequence.indices) {
@@ -20,26 +21,35 @@ fun main() {
             return numberOfOneBits
         }
 
-        fun getMoreCommonBits(sequenceSize: Int, numberOfOneBits: IntArray, numberOfSequences: Int): IntArray {
-            val moreCommonBits = IntArray(sequenceSize)
-            for (index in numberOfOneBits.indices) {
-                if (numberOfOneBits[index] > numberOfSequences / 2) {
-                    moreCommonBits[index] = 1
+        fun getMoreCommonBits(numberOfOneBits: IntArray, numberOfSequences: Int): List<Byte> {
+            val moreCommonBits = ArrayList<Byte>()
+            for (number in numberOfOneBits) {
+                if (number > numberOfSequences / 2) {
+                    moreCommonBits.add(1)
                 } else {
-                    moreCommonBits[index] = 0
+                    moreCommonBits.add(0)
                 }
             }
             return moreCommonBits
+        }
+
+        fun byteListToInt(bytes: List<Byte>): Int {
+            val listSize = bytes.size
+            var result = 0f
+            for (index in bytes.indices) {
+                result += bytes[index] * (2f.pow(listSize - index - 1))
+            }
+            return result.toInt()
         }
 
         val numberOfSequences = input.size
         val sequenceSize = input[0].length
         val inputInt = input.stream().map { getBytesForSequence(it) }.toList()
         val numberOfOneBits = getNumberOfOneBits(inputInt, sequenceSize)
-        val moreCommonBits = getMoreCommonBits(sequenceSize, numberOfOneBits, numberOfSequences)
+        val moreCommonBits = getMoreCommonBits(numberOfOneBits, numberOfSequences)
 
-        val gammaRate: Int = moreCommonBits.sum()
-        val epsilonRate: Int = moreCommonBits.sumOf { if (it == 1) 0 as Int; else 1 as Int }
+        val gammaRate: Int = byteListToInt(moreCommonBits)
+        val epsilonRate: Int = byteListToInt(moreCommonBits.map { if (it == 1.toByte()) 0.toByte(); else 1.toByte() }.toList())
 
         return gammaRate * epsilonRate
 
