@@ -21,7 +21,7 @@ fun main() {
         }
     }
 
-    class Board() {
+    class Board {
         val board = ArrayList<Line>()
 
         fun checkBoard(): Boolean {
@@ -46,15 +46,28 @@ fun main() {
         }
     }
 
-    class Boards() {
+    class Boards {
         val boards = ArrayList<Board>()
+        var winningBoards = boards.filter { board -> board.checkBoard() }.toList()
 
         fun forEachCell(action: (Cell) -> Unit) {
             return boards.forEach { board -> board.board.forEach { line -> line.line.forEach(action) } }
         }
 
-        fun checkBoards(): Boolean {
+        fun checkForOneWinningBoard(): Boolean {
             return boards.any { board -> board.checkBoard() }
+        }
+
+        fun checkForAllBoardsWinning(): Boolean {
+            return boards.all { board -> board.checkBoard() }
+        }
+
+        fun saveAllWinningBoards() {
+            winningBoards = boards.filter { board -> board.checkBoard() }.toList()
+        }
+
+        fun getLastWinningBoard(): Board {
+            return boards.minus(winningBoards.toSet())[0]
         }
 
         fun getWinningBoard(): Board {
@@ -90,7 +103,7 @@ fun main() {
         val boards = readBoards(input.subList(2, input.size))
         for (drawNumber in drawNumbers) {
             markCells(boards, drawNumber)
-            if (boards.checkBoards()) {
+            if (boards.checkForOneWinningBoard()) {
                 return boards.getWinningBoard().sumUnmarkedCells() * drawNumber
             }
         }
@@ -98,6 +111,15 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
+        val drawNumbers = input[0].split(',').map { it.toInt() }
+        val boards = readBoards(input.subList(2, input.size))
+        for (drawNumber in drawNumbers) {
+            boards.saveAllWinningBoards()
+            markCells(boards, drawNumber)
+            if (boards.checkForAllBoardsWinning()) {
+                return boards.getLastWinningBoard().sumUnmarkedCells() * drawNumber
+            }
+        }
         return 0
     }
 
@@ -105,7 +127,7 @@ fun main() {
     // test if implementation meets criteria from the description, like:
     val testInput = readInput("Day04_test")
     check(part1(testInput) == 4512)
-    check(part2(testInput) == 0)
+    check(part2(testInput) == 1924)
 
     val input = readInput("Day04")
     println(part1(input))
