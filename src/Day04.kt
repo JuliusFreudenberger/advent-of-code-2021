@@ -25,7 +25,16 @@ fun main() {
         val board = ArrayList<Line>()
 
         fun checkBoard(): Boolean {
-            return board.any { line -> line.checkLine() }
+            return board.any { line -> line.checkLine() } ||
+                    checkColumns()
+        }
+
+        fun checkColumns(): Boolean {
+            val noColumns = board[0].line.size
+            for (i in 0 until noColumns) {
+                if (board.all { line -> line.line[i].marked }) return true
+            }
+            return false
         }
 
         fun sumUnmarkedCells(): Int {
